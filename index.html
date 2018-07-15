@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>WebOS</title>
+
+    <link rel="stylesheet" href="master.min.css">
+    <link rel="stylesheet" href="window-manager.min.css">
+  </head>
+  <body>
+    <div id="bar">
+      <button type="button" onclick="infowindow()">About</button>
+    </div>
+    <div id="main"></div>
+  </body>
+  <script src="window-manager.js" charset="utf-8"></script>
+  <script type="text/javascript">
+    function infowindow()
+    {
+      let f = document.createElement('div');
+      f.setAttribute('id', 'about-window-frame');
+      f.innerHTML = '<h1>WebOS 2018 v0.1</h1><p>Concept by Adrian Kluska</p>';
+
+      new WindowHost(600, 300, 'About', 'about-window', {
+        minWidth: 600,
+        minHeight: 300,
+        pos: {
+          x: document.querySelector('#main').getBoundingClientRect().width / 2 - 300,
+          y: document.querySelector('#main').getBoundingClientRect().height / 2 - 150,
+        }
+      })
+      .setFrame(f)
+      .setStyle({
+        '#about-window-frame': {
+          'color': '#fff',
+          'height': '100%',
+          'textAlign': 'center',
+          'display': 'flex',
+          'flex-direction': 'column',
+          'justify-content': 'space-between',
+        },
+        'h1': {
+          'fontSize': '3em',
+          'paddingTop': '15%',
+        },
+      });
+    }
+  </script>
+</html>
