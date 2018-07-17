@@ -1,5 +1,6 @@
 /* Simple CSS reset */
-@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,700');
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
 * {
   margin: 0px;
@@ -7,6 +8,11 @@
   box-sizing: border-box;
   font-size: 14px;
   font-family: 'Roboto', sans-serif;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
 }
 
 html {
@@ -20,8 +26,6 @@ html {
     margin: 0;
     position: relative;
 
-    background: url('https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260') center center;
-
     #bar {
       background-color: #2d3434;
       height: 26px;
@@ -31,8 +35,8 @@ html {
         height: 100%;
         padding: 0 8px;
         background-color: transparent;
-        font-weight: 500;
         font-size: 1.1em;
+        font-weight: 300;
         border: none;
         color: white;
         cursor: pointer;
@@ -40,6 +44,10 @@ html {
         &:focus {
           box-shadow: none;
           outline: none;
+        }
+
+        &:first-of-type {
+          font-weight: 700;
         }
       }
     }

@@ -10,11 +10,17 @@
   <body>
     <div id="bar">
       <button type="button" onclick="infowindow()">About</button>
+      <button type="button" onclick="terminalApp()">Terminal</button>
     </div>
     <div id="main"></div>
   </body>
+  <script src="desktop-manager.js" charset="utf-8"></script>
   <script src="window-manager.js" charset="utf-8"></script>
   <script type="text/javascript">
+    window.Desk = new Desktop();
+
+    Desk.setBackground('https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg');
+
     function infowindow()
     {
       let f = document.createElement('div');
@@ -27,7 +33,8 @@
         pos: {
           x: document.querySelector('#main').getBoundingClientRect().width / 2 - 300,
           y: document.querySelector('#main').getBoundingClientRect().height / 2 - 150,
-        }
+        },
+        desktop: Desk.bg,
       })
       .setFrame(f)
       .setStyle({
@@ -44,6 +51,157 @@
           'paddingTop': '15%',
         },
       });
+    }
+
+    function terminalApp()
+    {
+      let aliases = {};
+
+      const commands = {
+          echo: function(input) { return input.replace('echo', ''); },
+          alias: function(input) {
+            let args = input.split(' ');
+              args.shift();
+
+            let al = args.shift();
+
+            let cmd = args[0];
+
+            let ipt = args.join(' ');
+
+            if (typeof commands[cmd] != 'undefined') {
+              aliases[al] = commands[cmd](ipt);
+            } else {
+              aliases[al] = ipt;
+            }
+
+            return false;
+          },
+          clear: function(input) {
+            f.querySelectorAll('div').forEach(function(div) {
+              div.remove();
+            });
+
+            return false;
+          }
+      };
+
+      let f = document.createElement('div');
+      f.setAttribute('id', 'terminal-window-frame');
+      f.style.padding = '5px';
+      f.style.color = '#fff';
+      f.style.height = '100%';
+
+      let prompt = document.createElement('span');
+      prompt.style.position = 'absolute';
+      prompt.innerText = '$: ';
+      prompt.style.left = 0;
+      prompt.style.fontFamily = '"Roboto Mono", monospace';
+
+      let input = document.createElement('span');
+      input.setAttribute('contenteditable', true);
+      input.setAttribute('tabindex', '-1');
+      input.style.width = '100%'
+      input.style.height = '100%';
+      input.style.display = 'block';
+      input.style.fontFamily = '"Roboto Mono", monospace';
+
+      input.onkeydown = function(e) {
+        if (e.key == 'Enter') {
+          e.preventDefault();
+
+          this.setAttribute('contenteditable', false);
+
+          let input = this.innerText.trim();
+          let command = input.substr(0, (input.indexOf(' ') == -1 ? input.length : input.indexOf(' ')));
+          let output;
+
+
+          if (input.length == 0) {
+            output = createLine();
+          } else if (typeof aliases[command] != 'undefined') {
+            output = createLine(aliases[command], null, 'blue');
+          } else if (typeof commands[command] == 'undefined') {
+            output = createLine('What do you mean brother?', null, 'red');
+          } else {
+            output = createLine(commands[command](input), null, 'green');
+          }
+
+          let nPrompt = document.createElement('span');
+          nPrompt.style.position = 'absolute';
+          nPrompt.innerText = '$: ';
+          nPrompt.style.left = 0;
+          nPrompt.style.fontFamily = '"Roboto Mono", monospace';
+
+          let nInput = document.createElement('span');
+          nInput.setAttribute('contenteditable', true);
+          nInput.setAttribute('tabindex', '-1');
+          nInput.style.width = '100%'
+          nInput.style.height = '100%';
+          nInput.style.display = 'block';
+          nInput.onkeydown = this.onkeydown;
+          nInput.style.fontFamily = '"Roboto Mono", monospace';
+
+          let nLine = createLine();
+
+          nLine.append(nPrompt);
+          nLine.append(nInput);
+
+          this.onkeydown = null;
+
+          f.append(output);
+          f.append(nLine);
+
+          nLine.style.paddingLeft = nPrompt.clientWidth * 2 +'px';
+          nLine.style.minHeight = nPrompt.clientHeight +'px';
+          nInput.focus();
+        }
+      }
+
+      let line = document.createElement('div');
+      line.style.position = 'relative';
+      line.style.marginBottom = '5px';
+
+      line.append(prompt);
+      line.append(input);
+      f.append(line);
+
+      new WindowHost(800, 400, 'Terminal', 'terminal-window', {
+        minWidth: 800,
+        minHeight: 400,
+        pos: {
+          x: document.querySelector('#main').getBoundingClientRect().width / 2 - 400,
+          y: document.querySelector('#main').getBoundingClientRect().height / 2 - 200,
+        },
+        desktop: Desk.bg,
+      }).setFrame(f);
+
+      line.style.paddingLeft = prompt.clientWidth * 2 +'px';
+      line.style.minHeight = prompt.clientHeight +'px';
+      input.focus();
+    }
+
+    function createLine(output = false, font = null, bg = null)
+    {
+      let line = document.createElement('div');
+      line.style.position = 'relative';
+
+      if (output) {
+        line.style.marginBottom = '5px';
+        
+        let prompt = document.createElement('span');
+        prompt.style.left = 0;
+        prompt.innerText = output;
+        prompt.style.padding = '0px 5px';
+        prompt.style.fontFamily = '"Roboto Mono", monospace';
+
+        if (font) { prompt.style.color = font; }
+        if (bg) { prompt.style.backgroundColor = bg; }
+
+        line.append(prompt)
+      }
+
+      return line;
     }
   </script>
 </html>

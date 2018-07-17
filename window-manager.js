@@ -20,6 +20,10 @@ class WindowHost {
       minimize: true,
       fullscreen: true,
     };
+    this.bgPos = op.desktop.pos;
+      this.bgPos.x -= 1;
+      this.bgPos.y -= 1;
+    this.bg = op.desktop;
 
     this.calcPos(op);
 
@@ -75,6 +79,17 @@ class WindowHost {
     host.style.width = this.width +'px';
     host.style.height = this.height +'px';
     host.style.zIndex = 10;
+
+    let bg = document.createElement('div');
+    bg.setAttribute('class', 'window-bg');
+    bg.style.background = 'url("'+ this.bg.src +'")';
+    bg.style.backgroundSize = this.bg.w +'px '+ this.bg.h +'px';
+    bg.style.backgroundPositionX = -this.pos.x + this.bgPos.x +'px';
+    bg.style.backgroundPositionY = -this.pos.y + this.bgPos.y +'px';
+
+    host.append(bg);
+
+    this.bg = host.querySelector('.window-bg');
 
     let handle = document.createElement('div');
 
@@ -155,23 +170,29 @@ class WindowHost {
         let newY = parent.host.offsetTop - parent.pos.y;
 
         if (newX < parent.wrapper.pos.x) {
+          parent.bg.style.backgroundPositionX = -parent.pos.x + parent.bgPos.x +"px";
           parent.host.style.left = parent.wrapper.pos.x + "px";
           parent.pos.x = parent.wrapper.pos.x;
         } else if (newX > parent.pos.mx) {
+          parent.bg.style.backgroundPositionX = -parent.pos.mx + parent.bgPos.x +"px";
           parent.host.style.left = parent.pos.mx + "px";
           parent.pos.x = parent.pos.mx;
         } else {
+          parent.bg.style.backgroundPositionX = -newX + parent.bgPos.x +"px";
           parent.host.style.left = newX + "px";
           parent.pos.x = newX;
         }
 
         if (newY < parent.wrapper.pos.y) {
+          parent.bg.style.backgroundPositionY = -parent.wrapper.pos.y + parent.bgPos.y +"px";
           parent.host.style.top = parent.wrapper.pos.y + "px";
           parent.pos.y = parent.wrapper.pos.y;
         } else if (newY > parent.pos.my) {
+          parent.bg.style.backgroundPositionY = -parent.wrapper.pos.my + parent.bgPos.y +"px";
           parent.host.style.top = parent.pos.my + "px";
           parent.pos.y = parent.wrapper.pos.my;
         } else {
+          parent.bg.style.backgroundPositionY = -newY + parent.bgPos.y +"px";
           parent.host.style.top = newY + "px";
           parent.pos.y = newY;
         }
@@ -185,6 +206,8 @@ class WindowHost {
   {
     let frame = document.createElement('div');
     frame.setAttribute('class', 'frame');
+    frame.style.width = this.width+'px';
+    frame.style.height = this.height+'px';
 
     return frame;
   }
@@ -336,6 +359,22 @@ class WindowHost {
   setFrame(html)
   {
     this.host.querySelector('.frame').append(html);
+
+    let parent = this;
+
+    let obs = new MutationObserver(function(list) {
+      parent.host.classList.add('focus');
+      html.querySelectorAll('*').forEach(function(item) {
+        item.onclick = item.onkeypress = function() {
+          parent.host.classList.add('focus');
+        }
+        item.onblur = function() {
+          parent.host.classList.remove('focus');
+        }
+      });
+    });
+
+    obs.observe(html, { attributes: true, childList: true, subtree: true });
 
     return this;
   }
